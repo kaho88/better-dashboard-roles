@@ -1,0 +1,29 @@
+better_dashboard_roles:
+  users:
+    schwiegervater:
+      role: garten
+    schwiegermutter:
+      role: garten
+    daniel:
+      role: admin
+
+  dashboards:
+    lovelace-garten:
+      roles:
+        - garten
+        - admin
+    lovelace-wohnung:
+      roles:
+        - admin
+        - wohnung
+
+  default_dashboard:
+    garten: lovelace-garten
+    admin: lovelace-wohnung
+    wohnung: lovelace-wohnung
+
+  options:
+    hide_sidebar_items: true
+    redirect_blocked_dashboards: true
+    hide_admin_menu_for_non_admin: true
+    debug: false

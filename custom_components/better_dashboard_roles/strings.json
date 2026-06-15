@@ -1,0 +1,67 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Better Dashboard Roles",
+        "description": "Configure dashboard role filtering. The text fields use YAML snippets without the top-level better_dashboard_roles key.",
+        "data": {
+          "users_yaml": "Users and roles",
+          "dashboards_yaml": "Dashboards and allowed roles",
+          "default_dashboard_yaml": "Default dashboard per role",
+          "hide_sidebar_items": "Hide sidebar dashboard links",
+          "redirect_blocked_dashboards": "Redirect blocked dashboards",
+          "hide_admin_menu_for_non_admin": "Hide admin menu for non-admin roles",
+          "debug": "Enable debug logs"
+        }
+      }
+    },
+    "error": {
+      "invalid_yaml": "The YAML is invalid.",
+      "invalid_users": "Each user needs a role value.",
+      "invalid_dashboards": "Each dashboard needs a roles list.",
+      "invalid_defaults": "Default dashboards must be role-to-dashboard text pairs."
+    },
+    "abort": {
+      "already_configured": "Better Dashboard Roles is already configured."
+    }
+  },
+  "options": {
+    "menu": {
+      "init": {
+        "assign_user": "Assign user role",
+        "edit_all": "Edit full configuration"
+      }
+    },
+    "step": {
+      "edit_all": {
+        "title": "Better Dashboard Roles",
+        "description": "Update dashboard role filtering. Changes are saved in Home Assistant storage and do not require editing configuration.yaml.",
+        "data": {
+          "users_yaml": "Users and roles",
+          "dashboards_yaml": "Dashboards and allowed roles",
+          "default_dashboard_yaml": "Default dashboard per role",
+          "hide_sidebar_items": "Hide sidebar dashboard links",
+          "redirect_blocked_dashboards": "Redirect blocked dashboards",
+          "hide_admin_menu_for_non_admin": "Hide admin menu for non-admin roles",
+          "debug": "Enable debug logs"
+        }
+      },
+      "assign_user": {
+        "title": "Assign user role",
+        "description": "Select a Home Assistant user and assign a role. The assignment is stored in Home Assistant storage.",
+        "data": {
+          "selected_user": "Home Assistant user",
+          "assigned_role": "Role"
+        }
+      }
+    },
+    "error": {
+      "invalid_yaml": "The YAML is invalid.",
+      "invalid_users": "Each user needs a role value.",
+      "invalid_dashboards": "Each dashboard needs a roles list.",
+      "invalid_defaults": "Default dashboards must be role-to-dashboard text pairs.",
+      "missing_role": "Enter a role.",
+      "missing_user": "Select a user."
+    }
+  }
+}
