@@ -16,6 +16,20 @@
     retryCount: 0,
   };
 
+  function installStyles() {
+    if (document.getElementById("better-user-settings-style")) {
+      return;
+    }
+    const style = document.createElement("style");
+    style.id = "better-user-settings-style";
+    style.textContent = `
+      [data-bus-hidden="true"] {
+        display: none !important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
   function debug(...args) {
     if (state.permissions?.options?.debug) {
       console.debug("[better-user-settings]", ...args);
@@ -81,7 +95,11 @@
   function hrefForElement(element) {
     return (
       element?.getAttribute?.("href") ||
+      element?.getAttribute?.("path") ||
       element?.href ||
+      element?.path ||
+      element?.item?.href ||
+      element?.item?.path ||
       element?.getAttribute?.("data-panel") ||
       ""
     );
@@ -94,7 +112,12 @@
     if (element.matches("a[href]")) {
       return true;
     }
-    if (element.matches("ha-sidebar-item, paper-icon-item") && hrefForElement(element)) {
+    if (
+      element.matches(
+        "ha-sidebar-item, ha-md-list-item, ha-list-item, paper-icon-item, mwc-list-item, sl-menu-item, ha-button-menu-item, [href], [path]"
+      ) &&
+      hrefForElement(element)
+    ) {
       return true;
     }
     return false;
@@ -103,7 +126,11 @@
   function closestSidebarItem(anchor) {
     return (
       anchor.closest("ha-sidebar-item") ||
+      anchor.closest("ha-md-list-item") ||
+      anchor.closest("ha-list-item") ||
       anchor.closest("paper-icon-item") ||
+      anchor.closest("mwc-list-item") ||
+      anchor.closest("sl-menu-item") ||
       anchor.closest("a") ||
       anchor
     );
@@ -114,6 +141,7 @@
       return;
     }
     element.dataset.bdrHidden = "true";
+    element.dataset.busHidden = "true";
     element.dataset.bdrPreviousDisplay = element.style.display || "";
     element.style.setProperty("display", "none", "important");
   }
@@ -124,6 +152,7 @@
     }
     element.style.display = element.dataset.bdrPreviousDisplay || "";
     delete element.dataset.bdrHidden;
+    delete element.dataset.busHidden;
     delete element.dataset.bdrPreviousDisplay;
   }
 
@@ -221,6 +250,24 @@
     }
   }
 
+  function debugState() {
+    const entries = [];
+    for (const root of findRoots()) {
+      for (const element of collectSidebarElements(root)) {
+        entries.push({
+          tag: element.localName,
+          href: hrefForElement(element),
+          text: (element.textContent || "").trim(),
+          hidden: element.dataset?.busHidden === "true",
+        });
+      }
+    }
+    return {
+      permissions: state.permissions,
+      entries,
+    };
+  }
+
   function startObserver() {
     if (state.observer) {
       return;
@@ -257,6 +304,8 @@
   async function boot() {
     try {
       state.permissions = await fetchPermissions();
+      installStyles();
+      window.betterUserSettingsDebug = debugState;
       debug("permissions loaded", {
         userId: state.permissions.user_id,
         isAdmin: state.permissions.is_admin,
