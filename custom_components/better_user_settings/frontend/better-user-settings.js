@@ -78,6 +78,28 @@
     );
   }
 
+  function hrefForElement(element) {
+    return (
+      element?.getAttribute?.("href") ||
+      element?.href ||
+      element?.getAttribute?.("data-panel") ||
+      ""
+    );
+  }
+
+  function isNavigableSidebarElement(element) {
+    if (!element?.matches) {
+      return false;
+    }
+    if (element.matches("a[href]")) {
+      return true;
+    }
+    if (element.matches("ha-sidebar-item, paper-icon-item") && hrefForElement(element)) {
+      return true;
+    }
+    return false;
+  }
+
   function closestSidebarItem(anchor) {
     return (
       anchor.closest("ha-sidebar-item") ||
@@ -118,8 +140,8 @@
     );
   }
 
-  function collectAnchors(root) {
-    const anchors = [];
+  function collectSidebarElements(root) {
+    const elements = [];
     const visited = new Set();
 
     function walk(node) {
@@ -127,15 +149,15 @@
         return;
       }
       visited.add(node);
-      if (node.nodeType === Node.ELEMENT_NODE && node.matches?.("a[href]")) {
-        anchors.push(node);
+      if (node.nodeType === Node.ELEMENT_NODE && isNavigableSidebarElement(node)) {
+        elements.push(node);
       }
       if (!node.querySelectorAll) {
         return;
       }
       for (const element of node.querySelectorAll("*")) {
-        if (element.matches?.("a[href]")) {
-          anchors.push(element);
+        if (isNavigableSidebarElement(element)) {
+          elements.push(element);
         }
         if (element.shadowRoot) {
           walk(element.shadowRoot);
@@ -144,7 +166,7 @@
     }
 
     walk(root);
-    return Array.from(new Set(anchors));
+    return Array.from(new Set(elements));
   }
 
   function filterSidebar() {
@@ -154,15 +176,15 @@
 
     let checked = 0;
     for (const root of findRoots()) {
-      for (const anchor of collectAnchors(root)) {
-        const href = anchor.getAttribute("href") || anchor.href;
+      for (const element of collectSidebarElements(root)) {
+        const href = hrefForElement(element);
         const dashboardPath = dashboardRoot(href);
         const shouldCheck = dashboardPath || isHiddenSidebarPath(href);
         if (!shouldCheck) {
           continue;
         }
         checked += 1;
-        const item = closestSidebarItem(anchor);
+        const item = closestSidebarItem(element);
         if (dashboardPath && !isAllowedDashboard(href)) {
           hideElement(item);
         } else if (isHiddenSidebarPath(href)) {
@@ -236,6 +258,14 @@
   async function boot() {
     try {
       state.permissions = await fetchPermissions();
+      debug("permissions loaded", {
+        userId: state.permissions.user_id,
+        isAdmin: state.permissions.is_admin,
+        groups: state.permissions.groups,
+        allowedDashboards: state.permissions.allowed_dashboard_paths,
+        hiddenDashboards: state.permissions.hidden_dashboard_paths,
+        hiddenSidebar: state.permissions.hidden_sidebar_paths,
+      });
       startObserver();
       applyRules();
       setTimeout(applyRules, 500);
