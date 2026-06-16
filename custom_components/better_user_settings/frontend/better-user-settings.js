@@ -6,7 +6,7 @@
   }
   window.__betterUserSettingsLoaded = true;
 
-  const API_URL = "/api/better_user_settings/permissions";
+  const API_PATH = "better_user_settings/permissions";
   const RETRY_DELAY_MS = 1000;
   const MAX_BOOT_RETRIES = 30;
 
@@ -245,14 +245,13 @@
   }
 
   async function fetchPermissions() {
-    const response = await fetch(API_URL, {
-      credentials: "same-origin",
-      headers: { Accept: "application/json" },
-    });
-    if (!response.ok) {
-      throw new Error(`API returned ${response.status}`);
+    const app = document.querySelector("home-assistant");
+    const hass = app?.hass;
+    if (hass?.callApi) {
+      return hass.callApi("GET", API_PATH);
     }
-    return response.json();
+
+    throw new Error("Home Assistant frontend API is not ready");
   }
 
   async function boot() {
